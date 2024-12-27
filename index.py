@@ -4,7 +4,9 @@ import json
 import os
 from datetime import datetime
 
-
+PERMITTED_ACTIONS = {
+    'add', 'list', 'delete', 'summary'
+  }
 EXPENSES_FILE = "expenses.json"
 
 def load_expenses():
@@ -36,11 +38,45 @@ def check_field(field, value):
   return value
 
 def check_permitted_actions(action):
-  permitted_actions = {
-    'add', 'list', 'delete', 'summary'
+  if action not in PERMITTED_ACTIONS:
+    raise Exception(f"Action not valid, should be one of:", "|".join(PERMITTED_ACTIONS))
+
+def add_action(args):
+  if len(args) < 4:
+      print("Not enough arguments provided for \"add\" operation")
+      return
+  expense = {
+    'id': str(uuid.uuid4()),
+    'created_at': datetime.now().strftime("%Y-%m-%d")
   }
-  if action not in permitted_actions:
-    raise Exception(f"Action not valid, should be one of:", "|".join(permitted_actions))
+  for i in range(2, len(args)-1, 2):
+    if args[i] is None and args[i+1] is None:
+      print(f"Argument pair missing {args[i]} missing")
+      return
+    field = args[i]
+    value = args[i+1]
+    validated_value = check_field(field, value)
+    expense[field[2:]] = validated_value
+
+  # Load existing expenses
+  expenses_list = load_expenses()
+  
+  # Add new expense to the list
+  expenses_list.append(expense)
+  
+  # Save updated expenses list
+  save_expenses(expenses_list)
+
+  print(f"Expense added successfully ID: {expense['id']}")
+
+  return
+
+def list_action():
+   return
+def delete_action():
+   return
+def summary_action():
+   return
 
 
 def main():
@@ -49,47 +85,18 @@ def main():
     print("Usage: python script.py <action> [arguments]")
     return
   
-  action = sys.argv[1]
-  check_permitted_actions(action)
+  current_action = sys.argv[1]
+  check_permitted_actions(current_action)
 
-  if action == 'add':
-    if len(sys.argv) < 4:
-      print("Not enough arguments provided for \"add\" operation")
-      return
-    
-    expense = {
-      'id': str(uuid.uuid4()),
-      'created_at': datetime.now().strftime("%Y-%m-%d")
-    }
-    for i in range(2, len(sys.argv)-1, 2):
-      if sys.argv[i] is None and sys.argv[i+1] is None:
-        print(f"Argument pair missing {sys.argv[i]} missing")
-        return
-      field = sys.argv[i]
-      value = sys.argv[i+1]
-      validated_value = check_field(field, value)
-      expense[field[2:]] = validated_value
+  ACTIONS = {
+    'add': add_action,
+    'list': list_action,
+    'delete': delete_action,
+    'summary': summary_action,
+  }
 
-    # Load existing expenses
-    expenses_list = load_expenses()
-    
-    # Add new expense to the list
-    expenses_list.append(expense)
-    
-    # Save updated expenses list
-    save_expenses(expenses_list)
-
-    print(f"Expense added successfully ID: {expense['id']}")
-
-    return
-  if action == 'list':
-    return
-  if action == 'delete':
-    return
-  if action == 'summary':
-    return
-
-
+  # Triggerer
+  ACTIONS[current_action](sys.argv)
 
 if __name__ == '__main__':
   main()
