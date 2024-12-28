@@ -72,11 +72,16 @@ def add_action(args):
   return
 
 def list_action():
-   return
+  expenses = load_expenses()
+  if len(expenses) > 0:
+    print(f"# ID                Date                Description         Amount")
+    for expense in expenses:
+      print(f"# {expense['id'][-6:]}            {expense['created_at']}          {expense['description']}              ${expense['amount']}")
+  return
 def delete_action():
-   return
+  return
 def summary_action():
-   return
+  return
 
 
 def main():
