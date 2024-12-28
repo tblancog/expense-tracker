@@ -21,10 +21,10 @@ def save_expenses(expenses_list):
 
 def check_field(field, value):
   permitted_fields = {
-    '--description': str, '--amount': int
+    '--description': str, '--amount': int, '--id': str
   }
   if field not in permitted_fields:
-    raise Exception("Field not valid, should be either --description or --amount with correspondent value, example --description \"Lunch\"")
+    raise Exception(f"Field not valid, should be either --description or --amount with correspondent value, example --description \"Lunch\", otherwise if deleting then it will be --id <ID>")
   if value is None:
     raise Exception("Value cannot be None")
   if field == '--amount':
@@ -71,15 +71,36 @@ def add_action(args):
 
   return
 
-def list_action():
+def list_action(args):
   expenses = load_expenses()
   if len(expenses) > 0:
     print(f"# ID                Date                Description         Amount")
     for expense in expenses:
-      print(f"# {expense['id'][-6:]}            {expense['created_at']}          {expense['description']}              ${expense['amount']}")
+      print(f"# {expense['id']}            {expense['created_at']}          {expense['description']}              ${expense['amount']}")
   return
-def delete_action():
-  return
+def delete_action(args):
+  if len(args) < 4:
+    print("Not enough arguments provided")
+    return
+  
+  expenses = load_expenses()
+  if len(expenses) == 0:
+    print("Nothing to delete")
+    return
+  
+  field = args[2]
+  id = args[3]
+  check_field(field, id)
+  for i in range(len(expenses)):
+    print(f"{[i]} {id}")
+    if expenses[i]['id'] == id:
+      expenses.pop(i)
+      save_expenses(expenses)
+      print(f"Expense deleted: {id}")
+      return
+  print(f"Id not found: {id}")
+  
+
 def summary_action():
   return
 
