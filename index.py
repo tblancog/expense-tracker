@@ -71,7 +71,7 @@ def add_action(args):
 
   return
 
-def list_action(args):
+def list_action(args = None):
   expenses = load_expenses()
   if len(expenses) > 0:
     print(f"# ID                Date                Description         Amount")
@@ -101,9 +101,15 @@ def delete_action(args):
   print(f"Id not found: {id}")
   
 
-def summary_action():
-  return
+def summary_action(args):
 
+  expenses = load_expenses()
+  if len(expenses) > 0:
+    total = sum(expense['amount'] for expense in expenses)
+    print(f"Total expenses: ${total}")
+    return
+  print("No expenses")
+  
 
 def main():
   if(len(sys.argv) < 2):
