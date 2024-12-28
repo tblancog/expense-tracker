@@ -21,7 +21,7 @@ def save_expenses(expenses_list):
 
 def check_field(field, value):
   permitted_fields = {
-    '--description': str, '--amount': int, '--id': str
+    '--description': str, '--amount': int, '--id': str, '--date': str
   }
   if field not in permitted_fields:
     raise Exception(f"Field not valid, should be either --description or --amount with correspondent value, example --description \"Lunch\", otherwise if deleting then it will be --id <ID>")
@@ -103,13 +103,21 @@ def delete_action(args):
 
 def summary_action(args):
 
+  if len(args) < 4:
+    print("Not enough arguments provided")
+    return
+  
   expenses = load_expenses()
+  date = args[3]
   if len(expenses) > 0:
-    total = sum(expense['amount'] for expense in expenses)
-    print(f"Total expenses: ${total}")
+    total = sum(expense['amount'] 
+              for expense in expenses if expense['created_at'][:7] == date
+            )
+    print(f"Total expenses: ${total} for {date}")
     return
   print("No expenses")
   
+
 
 def main():
   if(len(sys.argv) < 2):
